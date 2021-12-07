@@ -1,2 +1,2 @@
 # SnakeGame_Java
-This is an imitation of the snake game built with JavaFX
+This snake game is built with JavaFX
