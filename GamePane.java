@@ -1,12 +1,14 @@
 package com.programming.swittuth.snake_final_project;
 
 import javafx.animation.KeyFrame;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
@@ -15,6 +17,8 @@ import javafx.animation.Timeline;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.*;
 import javafx.util.Duration;
 import java.util.Random;
 import java.util.ArrayList;
@@ -33,6 +37,9 @@ public class GamePane extends Pane
     private final Label gameOverStatus = new Label("GAME OVER");
     private int gameScore = 0;
     private final Label scoreStatus = new Label(gameScore + "");
+    private final ScoreDatabase scoreDatabase = new ScoreDatabase();
+
+    private static final Lock lock = new ReentrantLock();
 
 
     public GamePane()
@@ -62,6 +69,7 @@ public class GamePane extends Pane
         tm.setCycleCount(Timeline.INDEFINITE);
 
         setOnKeyPressed(e -> {
+
             if (e.getCode() == KeyCode.UP)
             {
                 if (!down)
@@ -102,7 +110,6 @@ public class GamePane extends Pane
                     down = true;
                 }
             }
-
         });
 
         tm.play();
@@ -172,6 +179,53 @@ public class GamePane extends Pane
         gameOverStatus.setLayoutX(getWidth() / 4);
         gameOverStatus.setLayoutY(getHeight() / 2);
         getChildren().add(gameOverStatus);
+        displayInputName();
+
+    }
+
+    public void displayInputName()
+    {
+        VBox nameInputContainer = new VBox();
+        Button submitButton = new Button("Submit");
+        TextField nameInputField = new TextField();
+        nameInputContainer.getChildren().add(new Label("Please enter your name"));
+        nameInputContainer.getChildren().add(nameInputField);
+        nameInputContainer.getChildren().add(submitButton);
+        nameInputContainer.setLayoutX(getWidth() / 3);
+        nameInputContainer.setLayoutY(getHeight() / 2);
+        getChildren().add(nameInputContainer);
+        nameInputContainer.setAlignment(Pos.CENTER);
+
+        submitButton.setOnAction(e -> {
+            scoreDatabase.enterScore(nameInputField.getText(), gameScore);
+            displayHighScore();
+        });
+
+    }
+
+    public void displayHighScore()
+    {
+        getChildren().clear();
+        ArrayList<String> names = scoreDatabase.getTop10Names();
+        ArrayList<Integer> scores = scoreDatabase.getTop10Scores();
+
+        VBox highScoreContainer = new VBox();
+        highScoreContainer.getChildren().add(new Label("High Score"));
+        HBox playerNameScore;
+
+        for (int i = 0; i < names.size(); i++)
+        {
+            playerNameScore = new HBox(new Label(names.get(i), new Label(scores.get(i) + "")));
+            playerNameScore.setSpacing(30);
+            highScoreContainer.getChildren().add(playerNameScore);
+        }
+
+        highScoreContainer.setAlignment(Pos.CENTER);
+        highScoreContainer.setLayoutX(getHeight() / 2);
+        highScoreContainer.setLayoutY(getWidth() / 2);
+        setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(0),
+                Insets.EMPTY)));
+        getChildren().add(highScoreContainer);
     }
 
     public void snakeOnBorder()

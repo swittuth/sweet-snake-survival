@@ -3,7 +3,6 @@ package com.programming.swittuth.snake_final_project;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class SnakeGame extends Application
