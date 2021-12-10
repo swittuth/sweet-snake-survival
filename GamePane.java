@@ -1,13 +1,12 @@
 package com.programming.swittuth.snake_final_project;
 
 import javafx.animation.KeyFrame;
-import javafx.event.EventHandler;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Circle;
@@ -17,8 +16,6 @@ import javafx.animation.Timeline;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
-import java.util.concurrent.*;
-import java.util.concurrent.locks.*;
 import javafx.util.Duration;
 import java.util.Random;
 import java.util.ArrayList;
@@ -38,9 +35,7 @@ public class GamePane extends Pane
     private int gameScore = 0;
     private final Label scoreStatus = new Label(gameScore + "");
     private final ScoreDatabase scoreDatabase = new ScoreDatabase();
-
-    private static final Lock lock = new ReentrantLock();
-
+    private boolean changedDirection = true;
 
     public GamePane()
     {
@@ -51,7 +46,6 @@ public class GamePane extends Pane
         {
             getChildren().add(new Line(i, 0, i, 400));
         }
-
         for (int i = 20; i <= 400; i+= 20)
         {
             getChildren().add(new Line(0, i, 400, i));
@@ -62,52 +56,55 @@ public class GamePane extends Pane
         spawnSnake(400, 400, SNAKE_SIZE);
         spawnSnack();
         spawnScore();
-        setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(0),
+        setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(0),
                 Insets.EMPTY)));
 
-        tm = new Timeline(new KeyFrame(Duration.seconds(0.2), e -> moveSnake()));
+        tm = new Timeline(new KeyFrame(Duration.seconds(0.1), e -> moveSnake()));
         tm.setCycleCount(Timeline.INDEFINITE);
 
         setOnKeyPressed(e -> {
-
-            if (e.getCode() == KeyCode.UP)
+            if (changedDirection)
             {
-                if (!down)
+                changedDirection = false;
+                if (e.getCode() == KeyCode.UP)
                 {
-                    up = true;
-                    left = false;
-                    right = false;
-                    down = false;
+                    if (!down)
+                    {
+                        up = true;
+                        left = false;
+                        right = false;
+                        down = false;
+                    }
                 }
-            }
-            else if (e.getCode() == KeyCode.LEFT)
-            {
-                if (!right)
+                else if (e.getCode() == KeyCode.LEFT)
                 {
-                    up = false;
-                    left = true;
-                    right = false;
-                    down = false;
+                    if (!right)
+                    {
+                        up = false;
+                        left = true;
+                        right = false;
+                        down = false;
+                    }
                 }
-            }
-            else if (e.getCode() == KeyCode.RIGHT)
-            {
-                if (!left)
+                else if (e.getCode() == KeyCode.RIGHT)
                 {
-                    up = false;
-                    left = false;
-                    right = true;
-                    down = false;
+                    if (!left)
+                    {
+                        up = false;
+                        left = false;
+                        right = true;
+                        down = false;
+                    }
                 }
-            }
-            else if (e.getCode() == KeyCode.DOWN)
-            {
-                if (!up)
+                else if (e.getCode() == KeyCode.DOWN)
                 {
-                    up = false;
-                    left = false;
-                    right = false;
-                    down = true;
+                    if (!up)
+                    {
+                        up = false;
+                        left = false;
+                        right = false;
+                        down = true;
+                    }
                 }
             }
         });
@@ -168,6 +165,11 @@ public class GamePane extends Pane
         {
             gameOver();
         }
+
+        if (!changedDirection)
+        {
+            changedDirection = true;
+        }
     }
 
     public void gameOver()
@@ -180,6 +182,7 @@ public class GamePane extends Pane
         gameOverStatus.setLayoutY(getHeight() / 2);
         getChildren().add(gameOverStatus);
         displayInputName();
+        displayNewHighScore();
 
     }
 
@@ -211,14 +214,32 @@ public class GamePane extends Pane
 
         VBox highScoreContainer = new VBox();
         highScoreContainer.getChildren().add(new Label("High Score"));
-        HBox playerNameScore;
 
-        for (int i = 0; i < names.size(); i++)
+        new Thread(() -> {
+            Platform.runLater(() ->
+            {
+                for (int i = 0; i < names.size() / 2; i++) {
+                    HBox playerNameScore;
+                    playerNameScore = new HBox(new Label(names.get(i), new Label(scores.get(i) + "")));
+                    playerNameScore.setSpacing(30);
+                    highScoreContainer.getChildren().add(playerNameScore);
+                }
+            });
+        }).start();
+
+        new Thread(() ->
         {
-            playerNameScore = new HBox(new Label(names.get(i), new Label(scores.get(i) + "")));
-            playerNameScore.setSpacing(30);
-            highScoreContainer.getChildren().add(playerNameScore);
-        }
+            Platform.runLater(() ->
+            {
+                for (int i = (names.size() / 2) - 1; i < names.size(); i++)
+                {
+                    HBox playerNameScore;
+                    playerNameScore = new HBox(new Label(names.get(i), new Label(scores.get(i) + "")));
+                    playerNameScore.setSpacing(30);
+                    highScoreContainer.getChildren().add(playerNameScore);
+                }
+            });
+        }).start();
 
         highScoreContainer.setAlignment(Pos.CENTER);
         highScoreContainer.setLayoutX(getHeight() / 2);
@@ -226,6 +247,48 @@ public class GamePane extends Pane
         setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(0),
                 Insets.EMPTY)));
         getChildren().add(highScoreContainer);
+    }
+
+    public void displayNewHighScore()
+    {
+        ArrayList<Integer> scores = scoreDatabase.getTop10Scores();
+        if (gameScore > scores.get(0))
+        {
+            Label labelHighScore = new Label("NEW HIGHSCORE: " + gameScore);
+            labelHighScore.setLayoutX(getWidth() / 2);
+            labelHighScore.setLayoutY(20);
+            getChildren().add(labelHighScore);
+
+            new Thread(() -> {
+                try
+                {
+                    String text = "";
+                    while (true)
+                    {
+                        if (labelHighScore.getText().trim().length() == 0)
+                        {
+                            text = "NEW HIGHSCORE " + gameScore;
+                        }
+                        else
+                        {
+                            text = "";
+                        }
+
+                        String finalText = text;
+                        Platform.runLater(() ->
+                        {
+                            labelHighScore.setText(finalText);
+                        });
+
+                        Thread.sleep(200);
+                    }
+                }
+                catch (InterruptedException ex)
+                {
+                    ex.printStackTrace();
+                }
+            }).start();
+        }
     }
 
     public void snakeOnBorder()
