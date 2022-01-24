@@ -9,11 +9,11 @@ This snake game is built with JavaFX and SQL
 ## General Information
 Sweet Snake is a modified recreation of the original Snake Game. The snake loves sweets and dislike sour. Throughout the game, snack, fruits and poison spawn on the screen. They have the following properties: 
 
-Snack: worth 1 point and increase speed rate by 0.01
-Strawberry: worth 10 points and increase speed rate by 0.1
-Orange: Worth 5 points and increase speed rate by 0.05
-Lemon: Worth 2 points and increase speed rate by 0.02
-Poison: Lose 1 life and decrease speed rate
++ Snack: worth 1 point and increase speed rate by 0.01
++ Strawberry: worth 10 points and increase speed rate by 0.1
++ Orange: Worth 5 points and increase speed rate by 0.05
++ Lemon: Worth 2 points and increase speed rate by 0.02
++ Poison: Lose 1 life and decrease speed rate
 
 The snake has 3 lives. The main goal of the game is to get as many points as possble. The game ends when the snake bites itself or decrease its lives to 0 by eating the poison bottle. 
 
