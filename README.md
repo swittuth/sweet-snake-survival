@@ -3,7 +3,7 @@
 This snake game is built with JavaFX and SQL
 
 ## Table of Content
-* [General Information and Game Rule](#general-info)
+* [General Information](#general-info)
 * [Setup Instruction](#setup-instruction)
 
 ## General Information
