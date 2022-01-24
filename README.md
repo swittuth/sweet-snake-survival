@@ -28,8 +28,8 @@ The game was coded in IntelliJ IDEA. MySQL local database was used as well so th
 2. Maven Dependencies:
 - Add the files in the 'jar-modules' folder into the project structure:
 - You can do so following the steps below: 
-+ Locate File in the Main Menu -> File -> Project Structure -> Modules
-+ Click on the '+' symbol -> JAR or directories -> add in the modules
+  + Locate File in the Main Menu -> File -> Project Structure -> Modules
+  + Click on the '+' symbol -> JAR or directories -> add in the modules
 
 3. MySQL connection
 - Included in the jar modules is a file named "mySQL_connector.jar". This module will allow us to connect the program to the MySQL database
