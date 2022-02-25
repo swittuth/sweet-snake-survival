@@ -1,4 +1,4 @@
-# Sweet Tooth Snake - JavaFX GUI Game 
+# Sweet Snake Survival - JavaFX GUI Game 
 
 This snake game is built with JavaFX and SQL
 
